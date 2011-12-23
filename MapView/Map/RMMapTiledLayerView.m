@@ -14,7 +14,7 @@
 @interface RMMapOverlayView ()
 
 - (void)handleDoubleTap:(UIGestureRecognizer *)recognizer;
-- (void)handleTwoFingerDoubleTap:(UIGestureRecognizer *)recognizer;
+- (void)handleTwoFingerTap:(UIGestureRecognizer *)recognizer;
 
 @end
 
@@ -53,15 +53,15 @@
     UITapGestureRecognizer *singleTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)] autorelease];
     [singleTapRecognizer requireGestureRecognizerToFail:doubleTapRecognizer];
 
-    UITapGestureRecognizer *twoFingerDoubleTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTwoFingerDoubleTap:)] autorelease];
-    twoFingerDoubleTapRecognizer.numberOfTapsRequired = 2;
-    twoFingerDoubleTapRecognizer.numberOfTouchesRequired = 2;
+    UITapGestureRecognizer *twoFingerTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTwoFingerTap:)] autorelease];
+    twoFingerTapRecognizer.numberOfTapsRequired = 1;
+    twoFingerTapRecognizer.numberOfTouchesRequired = 2;
 
     UILongPressGestureRecognizer *longPressRecognizer = [[[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)] autorelease];
 
     [self addGestureRecognizer:singleTapRecognizer];
     [self addGestureRecognizer:doubleTapRecognizer];
-    [self addGestureRecognizer:twoFingerDoubleTapRecognizer];
+    [self addGestureRecognizer:twoFingerTapRecognizer];
     [self addGestureRecognizer:longPressRecognizer];
 
     return self;
@@ -120,10 +120,10 @@
         [delegate mapTiledLayerView:self doubleTapAtPoint:[recognizer locationInView:mapView]];
 }
 
-- (void)handleTwoFingerDoubleTap:(UIGestureRecognizer *)recognizer
+- (void)handleTwoFingerTap:(UIGestureRecognizer *)recognizer
 {
-    if ([delegate respondsToSelector:@selector(mapTiledLayerView:twoFingerDoubleTapAtPoint:)])
-        [delegate mapTiledLayerView:self twoFingerDoubleTapAtPoint:[recognizer locationInView:mapView]];
+    if ([delegate respondsToSelector:@selector(mapTiledLayerView:twoFingerTapAtPoint:)])
+        [delegate mapTiledLayerView:self twoFingerTapAtPoint:[recognizer locationInView:mapView]];
 }
 
 @end

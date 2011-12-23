@@ -282,7 +282,7 @@
     _delegateHasMapViewRegionDidChange = [delegate respondsToSelector:@selector(mapViewRegionDidChange:)];
 
     _delegateHasDoubleTapOnMap = [delegate respondsToSelector:@selector(doubleTapOnMap:at:)];
-    _delegateHasDoubleTapTwoFingersOnMap = [delegate respondsToSelector:@selector(doubleTapTwoFingersOnMap:at:)];
+    _delegateHasTapTwoFingersOnMap = [delegate respondsToSelector:@selector(tapTwoFingersOnMap:at:)];
     _delegateHasSingleTapOnMap = [delegate respondsToSelector:@selector(singleTapOnMap:at:)];
     _delegateHasLongSingleTapOnMap = [delegate respondsToSelector:@selector(longSingleTapOnMap:at:)];
 
@@ -1045,12 +1045,12 @@
         [delegate doubleTapOnMap:self at:aPoint];
 }
 
-- (void)mapTiledLayerView:(RMMapTiledLayerView *)aTiledLayerView twoFingerDoubleTapAtPoint:(CGPoint)aPoint
+- (void)mapTiledLayerView:(RMMapTiledLayerView *)aTiledLayerView twoFingerTapAtPoint:(CGPoint)aPoint
 {
     [self zoomOutToNextNativeZoomAt:aPoint animated:YES];
 
-    if (_delegateHasDoubleTapTwoFingersOnMap)
-        [delegate doubleTapTwoFingersOnMap:self at:aPoint];
+    if (_delegateHasTapTwoFingersOnMap)
+        [delegate tapTwoFingersOnMap:self at:aPoint];
 }
 
 - (void)mapTiledLayerView:(RMMapTiledLayerView *)aTiledLayerView longPressAtPoint:(CGPoint)aPoint
