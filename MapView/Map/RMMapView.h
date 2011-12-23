@@ -102,7 +102,7 @@ typedef enum {
     BOOL _delegateHasAfterMapZoom;
     BOOL _delegateHasMapViewRegionDidChange;
     BOOL _delegateHasDoubleTapOnMap;
-    BOOL _delegateHasDoubleTapTwoFingersOnMap;
+    BOOL _delegateHasTapTwoFingersOnMap;
     BOOL _delegateHasSingleTapOnMap;
     BOOL _delegateHasLongSingleTapOnMap;
     BOOL _delegateHasTapOnAnnotation;
