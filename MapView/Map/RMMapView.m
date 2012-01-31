@@ -42,6 +42,7 @@
 #import "RMTileCache.h"
 #import "RMTileSource.h"
 
+#import "RMScrollView.h"
 #import "RMMapTiledLayerView.h"
 #import "RMMapOverlayView.h"
 
@@ -883,7 +884,7 @@
     int tileSideLength = [[self tileSource] tileSideLength];
     CGSize contentSize = CGSizeMake(tileSideLength, tileSideLength); // zoom level 1
 
-    mapScrollView = [[UIScrollView alloc] initWithFrame:[self bounds]];
+    mapScrollView = [[RMScrollView alloc] initWithFrame:[self bounds]];
     mapScrollView.delegate = self;
     mapScrollView.opaque = NO;
     mapScrollView.backgroundColor = [UIColor clearColor];
