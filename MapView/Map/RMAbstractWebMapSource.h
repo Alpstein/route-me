@@ -29,7 +29,7 @@
 #import "RMProjection.h"
 
 #define RMAbstractWebMapSourceRetryCount  3
-#define RMAbstractWebMapSourceWaitSeconds 2
+#define RMAbstractWebMapSourceWaitSeconds 2.0f
 
 @interface RMAbstractWebMapSource : RMAbstractMercatorTileSource
 

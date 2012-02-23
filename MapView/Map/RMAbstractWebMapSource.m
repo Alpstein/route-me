@@ -90,8 +90,13 @@
             for (int try = 0; try < RMAbstractWebMapSourceRetryCount; try++)
             {
                 if ( ! tileData)
-                    // Beware: dataWithContentsOfURL is leaking like hell. Better use AFNetwork or ASIHTTPRequest
-                    tileData = [NSData dataWithContentsOfURL:currentURL options:NSDataReadingUncached error:NULL];
+                {
+                    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:currentURL];
+                    
+                    [request setTimeoutInterval:(RMAbstractWebMapSourceWaitSeconds / (CGFloat)RMAbstractWebMapSourceRetryCount)];
+                    
+                    tileData = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
+                }
             }
 
             if (tileData)
