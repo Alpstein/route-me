@@ -1,5 +1,5 @@
 //
-//  RMMapBoxSource.h
+//  RMMapBoxSource.m
 //
 //  Created by Justin R. Miller on 5/17/11.
 //  Copyright 2012 MapBox.
