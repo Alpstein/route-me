@@ -74,6 +74,7 @@ typedef enum {
     /// subview for the background image displayed while tiles are loading. Set its contents by providing your own "loading.png".
     UIView *backgroundView;
     UIScrollView *mapScrollView;
+    UIView *tiledLayersView;
     RMMapTiledLayerView *tiledLayerView;
     RMMapOverlayView *overlayView;
 
@@ -87,6 +88,7 @@ typedef enum {
     CGSize          clusterMarkerSize, clusterAreaSize;
 
     id <RMTileSource> tileSource;
+    NSMutableArray *additionalTileSources; // array of id<RMTileSource> for overlaying on main one
     RMTileCache *tileCache; // Generic tile cache
 
     /// minimum and maximum zoom number allowed for the view. #minZoom and #maxZoom must be within the limits of #tileSource but can be stricter; they are clamped to tilesource limits if needed.
@@ -130,7 +132,6 @@ typedef enum {
 @property (nonatomic, readonly) RMProjection *projection;
 @property (nonatomic, readonly) id <RMMercatorToTileProjection> mercatorToTileProjection;
 
-@property (nonatomic, retain) id <RMTileSource> tileSource;
 @property (nonatomic, retain) RMTileCache *tileCache;
 
 @property (nonatomic, retain) UIView *backgroundView;
@@ -150,6 +151,12 @@ typedef enum {
     backgroundImage:(UIImage *)backgroundImage;
 
 - (void)setFrame:(CGRect)frame;
+
+- (void)setTileSource:(id <RMTileSource>)newTileSource;
+- (void)addTileSource:(id <RMTileSource>)newTileSource;
+- (void)removeTileSource:(id <RMTileSource>)aTileSource;
+- (void)showTileSource:(id <RMTileSource>)aTileSource;
+- (void)hideTileSource:(id <RMTileSource>)aTileSource;
 
 #pragma mark -
 #pragma mark Movement

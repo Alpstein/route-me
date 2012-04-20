@@ -133,6 +133,7 @@
     projection = nil;
     mercatorToTileProjection = nil;
     mapScrollView = nil;
+    tiledLayersView = nil;
     tiledLayerView = nil;
     overlayView = nil;
 
@@ -154,6 +155,8 @@
 
     [self setTileCache:[[[RMTileCache alloc] init] autorelease]];
     [self setTileSource:newTilesource];
+
+    additionalTileSources = [[NSMutableArray array] retain];
 
     [self setBackgroundView:[[[UIView alloc] initWithFrame:[self bounds]] autorelease]];
     if (backgroundImage)
@@ -271,6 +274,12 @@
     [annotations release]; annotations = nil;
     [visibleAnnotations release]; visibleAnnotations = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    for (id<RMTileSource>aTileSource in additionalTileSources) {
+        [aTileSource cancelAllDownloads];
+    }
+    [additionalTileSources removeAllObjects];
+    [additionalTileSources release]; additionalTileSources = nil;
+    [tiledLayersView release]; tiledLayersView = nil;
     [tiledLayerView release]; tiledLayerView = nil;
     [mapScrollView removeObserver:self forKeyPath:@"contentOffset"];
     [mapScrollView release]; mapScrollView = nil;
@@ -286,6 +295,9 @@
 {
     LogMethod();
 
+    for (id<RMTileSource>aTileSource in additionalTileSources) {
+        [aTileSource didReceiveMemoryWarning];
+    }
     [tileSource didReceiveMemoryWarning];
     [tileCache didReceiveMemoryWarning];
 }
@@ -923,6 +935,7 @@
     [overlayView removeFromSuperview]; [overlayView release]; overlayView = nil;
     [visibleAnnotations removeAllObjects];
 
+    [tiledLayersView removeFromSuperview]; [tiledLayersView release]; tiledLayersView = nil;
     [tiledLayerView removeFromSuperview]; [tiledLayerView release]; tiledLayerView = nil;
 
     [mapScrollView removeObserver:self forKeyPath:@"contentOffset"];
@@ -945,8 +958,11 @@
     mapScrollView.maximumZoomScale = exp2f([self maxZoom]);
     mapScrollView.contentOffset = CGPointMake(0.0, 0.0);
 
+    tiledLayersView = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, contentSize.width, contentSize.height)];
+    
     tiledLayerView = [[RMMapTiledLayerView alloc] initWithFrame:CGRectMake(0.0, 0.0, contentSize.width, contentSize.height) mapView:self];
     tiledLayerView.delegate = self;
+    tiledLayerView.tileSource = [self tileSource];
 
     if (self.adjustTilesForRetinaDisplay && screenScale > 1.0)
     {
@@ -958,7 +974,8 @@
         ((CATiledLayer *)tiledLayerView.layer).tileSize = CGSizeMake(tileSideLength, tileSideLength);
     }
 
-    [mapScrollView addSubview:tiledLayerView];
+    [tiledLayersView addSubview:tiledLayerView];
+    [mapScrollView addSubview:tiledLayersView];
 
     [mapScrollView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew context:NULL];
     [mapScrollView setZoomScale:exp2f([self zoom]) animated:NO];
@@ -980,7 +997,7 @@
 
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView
 {
-    return tiledLayerView;
+    return tiledLayersView;
 }
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
@@ -1213,7 +1230,7 @@
 
     [tileSource cancelAllDownloads];
     [tileSource autorelease];
-    tileSource = [newTileSource retain];
+    tileSource = tiledLayerView.tileSource = [newTileSource retain];
 
     [projection release];
     projection = [[tileSource projection] retain];
@@ -1237,6 +1254,69 @@
     // Reload the map with the new tilesource
     tiledLayerView.layer.contents = nil;
     [tiledLayerView.layer setNeedsDisplay];
+}
+
+- (void)addTileSource:(id <RMTileSource>)newTileSource
+{
+    if ([additionalTileSources containsObject:newTileSource])
+        return;
+
+    [additionalTileSources addObject:newTileSource];
+
+    int tileSideLength = [newTileSource tileSideLength];
+    CGSize contentSize = CGSizeMake(tileSideLength, tileSideLength); // zoom level 1
+    
+    RMMapTiledLayerView *newTiledLayerView = [[RMMapTiledLayerView alloc] initWithFrame:CGRectMake(0.0, 0.0, contentSize.width, contentSize.height) mapView:self];
+    newTiledLayerView.delegate = self;
+    newTiledLayerView.tileSource = newTileSource;
+    newTiledLayerView.userInteractionEnabled = NO;
+    
+    if (self.adjustTilesForRetinaDisplay && screenScale > 1.0)
+    {
+        RMLog(@"adjustTiles");
+        ((CATiledLayer *)newTiledLayerView.layer).tileSize = CGSizeMake(tileSideLength * 2.0, tileSideLength * 2.0);
+    }
+    else
+    {
+        ((CATiledLayer *)newTiledLayerView.layer).tileSize = CGSizeMake(tileSideLength, tileSideLength);
+    }
+    
+    [tiledLayersView addSubview:newTiledLayerView];
+    
+    // Reload the map with the new tilesource
+    newTiledLayerView.layer.contents = nil;
+    [newTiledLayerView.layer setNeedsDisplay];
+}
+
+- (void)removeTileSource:(id <RMTileSource>)aTileSource {
+    [aTileSource cancelAllDownloads];
+    for (RMMapTiledLayerView *view in tiledLayersView.subviews) {
+        if (view.tileSource == aTileSource) {
+            [view removeFromSuperview];
+            break;
+        }
+    }
+    [additionalTileSources removeObject:aTileSource];
+}
+
+- (void)showTileSource:(id <RMTileSource>)aTileSource
+{
+    for (RMMapTiledLayerView *view in tiledLayersView.subviews) {
+        if (view.tileSource == aTileSource) {
+            view.hidden = NO;
+            break;
+        }
+    }
+}
+
+- (void)hideTileSource:(id <RMTileSource>)aTileSource
+{
+    for (RMMapTiledLayerView *view in tiledLayersView.subviews) {
+        if (view.tileSource == aTileSource) {
+            view.hidden = YES;
+            break;
+        }
+    }
 }
 
 - (UIView *)backgroundView
