@@ -21,7 +21,7 @@
 	<key>description</key>
 	<string>One of the example maps that comes with TileMill - a bright &amp; colorful world map that blends retro and high-tech with its folded paper texture and interactive flag tooltips.</string>
 	<key>formatter</key>
-	<string>function(options, data) { switch (options.format) { case 'full': return '';       break; case 'location': return ''; break; case 'teaser': default: return '&lt;img src="data:image/png;base64,' + data.flagpng + '" style="box-shadow:0px 1px 5px #333;-moz-box-shadow:0px 1px 5px #333;-webkit-box-shadow:0px 1px 5px #333;" /&gt;&lt;br /&gt; &lt;strong&gt;' + data.ADMIN + '&lt;/strong&gt;'; break; }}</string>
+	<string>function(options, data) { switch (options.format) { case &apos;full&apos;: return &apos;&apos;;       break; case &apos;location&apos;: return &apos;&apos;; break; case &apos;teaser&apos;: default: return &apos;&lt;img src=&quot;data:image/png;base64,&apos; + data.flagpng + &apos;&quot; style=&quot;box-shadow:0px 1px 5px #333;-moz-box-shadow:0px 1px 5px #333;-webkit-box-shadow:0px 1px 5px #333;&quot; /&gt;&lt;br /&gt; &lt;strong&gt;&apos; + data.ADMIN + &apos;&lt;/strong&gt;&apos;; break; }}</string>
 	<key>gridURL</key>
 	<string>http://a.tiles.mapbox.com/mapbox/1.0.0/geography-class/{z}/{x}/{y}.grid.json</string>
 	<key>id</key>
@@ -42,5 +42,7 @@
 	<string>baselayer</string>
 	<key>version</key>
 	<string>1.0.0</string>
+	<key>scheme</key>
+	<string>tms</string>
 </dict>
 </plist>
