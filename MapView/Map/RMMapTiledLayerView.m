@@ -20,7 +20,7 @@
 
 @implementation RMMapTiledLayerView
 
-@synthesize delegate;
+@synthesize delegate, tileSource;
 
 + (Class)layerClass
 {
@@ -44,8 +44,8 @@
     self.opaque = NO;
 
     CATiledLayer *tiledLayer = [self tiledLayer];
-    tiledLayer.levelsOfDetail = [[mapView tileSource] maxZoom];
-    tiledLayer.levelsOfDetailBias = [[mapView tileSource] maxZoom];
+    tiledLayer.levelsOfDetail = [mapView maxZoom];
+    tiledLayer.levelsOfDetailBias = [mapView maxZoom];
 
     UITapGestureRecognizer *doubleTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTap:)] autorelease];
     doubleTapRecognizer.numberOfTapsRequired = 2;
@@ -74,7 +74,7 @@
 
 - (void)dealloc
 {
-    [[mapView tileSource] cancelAllDownloads];
+    [tileSource cancelAllDownloads];
     [mapView release]; mapView = nil;
     [super dealloc];
 }
@@ -92,14 +92,17 @@
 
     short zoom = log2(bounds.size.width / rect.size.width);
     int x = floor(rect.origin.x / rect.size.width), y = floor(fabs(rect.origin.y / rect.size.height));
-//    NSLog(@"Tile @ x:%d, y:%d, zoom:%d", x, y, zoom);
+//    NSLog(@"tilesource:%@; tile @ x:%d, y:%d, zoom:%d", [tileSource shortName], x, y, zoom);
 
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-    UIImage *tileImage = [[mapView tileSource] imageForTile:RMTileMake(x, y, zoom) inCache:[mapView tileCache]];
-    [tileImage drawInRect:rect];
-
-    [pool release]; pool = nil;
+    // the mapView main tileSource may have defined zoom limits greater than this tileSource can handle, so check
+    if (zoom >= [tileSource minZoom] && zoom <= [tileSource maxZoom]) {
+        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+        
+        UIImage *tileImage = [tileSource imageForTile:RMTileMake(x, y, zoom) inCache:[mapView tileCache]];
+        [tileImage drawInRect:rect];
+        
+        [pool release]; pool = nil;
+    }
 }
 
 #pragma mark -
