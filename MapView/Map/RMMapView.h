@@ -132,6 +132,7 @@ typedef enum {
 @property (nonatomic, readonly) RMProjection *projection;
 @property (nonatomic, readonly) id <RMMercatorToTileProjection> mercatorToTileProjection;
 
+@property (nonatomic, retain) id <RMTileSource> tileSource;
 @property (nonatomic, retain) RMTileCache *tileCache;
 
 @property (nonatomic, retain) UIView *backgroundView;
