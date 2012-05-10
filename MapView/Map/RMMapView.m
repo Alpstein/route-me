@@ -911,6 +911,192 @@
     [tileCache removeAllCachedImages];
 }
 
+
+#pragma mark - Gesture Handling
+
+// defines when the additional pan gesture recognizer on the scroll should
+// handle the gesture
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)recognizer {
+    
+    if ([recognizer isKindOfClass:[UIPanGestureRecognizer class]])
+    {
+        // check whehter our custom pan gesture recognizer should start
+        // recognizing the gesture
+        CALayer *hit = [overlayView.layer hitTest:[recognizer locationInView:overlayView]];
+        
+        if (!hit 
+            || ([hit respondsToSelector:@selector(enableDragging)] && ![(RMMarker *)hit enableDragging]))
+            return NO;
+        
+        if (![self mapOverlayView:overlayView shouldDragAnnotation:overlayView.draggedAnnotation])
+            return NO;
+    }
+    
+    return YES;
+}
+
+
+// one finger taps
+
+- (void)handleSingleTap:(UIGestureRecognizer *)recognizer
+{    
+    CALayer *hit = [overlayView.layer hitTest:[recognizer locationInView:overlayView]];
+    
+    // if we did not hit a layer of the overlay we inform the tiled layer view
+    if (!hit)
+    {
+        [self mapTiledLayerView:tiledLayerView 
+               singleTapAtPoint:[recognizer locationInView:self]];
+        // ???: Why do we use locationInView:self here and locationInView:overlayView later?
+    }
+    
+    CALayer *superlayer = [hit superlayer];
+    
+    // See if tap was on a marker or marker label and send delegate protocol method
+    if ([hit isKindOfClass:[RMMarker class]])
+    {
+        [self mapOverlayView:overlayView 
+             tapOnAnnotation:[((RMMarker *)hit) annotation] 
+                     atPoint:[recognizer locationInView:overlayView]];
+    }
+    else if (superlayer != nil && [superlayer isKindOfClass:[RMMarker class]])
+    {
+        [self mapOverlayView:overlayView
+     tapOnLabelForAnnotation:[((RMMarker *)superlayer) annotation] 
+                     atPoint:[recognizer locationInView:overlayView]];
+    }
+    else if ([superlayer superlayer] != nil && [[superlayer superlayer] isKindOfClass:[RMMarker class]])
+    {
+        [self mapOverlayView:overlayView 
+     tapOnLabelForAnnotation:[((RMMarker *)[superlayer superlayer]) annotation] 
+                     atPoint:[recognizer locationInView:overlayView]];
+    }
+    else
+    {
+        // if none of the conditions where satisfied we perform the corresponding
+        // action on the map
+        [self mapTiledLayerView:tiledLayerView 
+               singleTapAtPoint:[recognizer locationInView:self]];
+    }
+}
+
+- (void)handleDoubleTap:(UIGestureRecognizer *)recognizer
+{    
+    CALayer *hit = [overlayView.layer hitTest:[recognizer locationInView:overlayView]];
+    
+    // if we did not hit a layer of the overlay we inform the tiled layer view
+    if (!hit)
+    {        
+        [self mapTiledLayerView:tiledLayerView 
+               doubleTapAtPoint:[recognizer locationInView:self]];
+    }
+    
+    CALayer *superlayer = [hit superlayer];
+    
+    // See if tap was on a marker or marker label and send delegate protocol method
+    if ([hit isKindOfClass:[RMMarker class]])
+    {
+        [self mapOverlayView:overlayView 
+       doubleTapOnAnnotation:[((RMMarker *)hit) annotation] 
+                     atPoint:[recognizer locationInView:overlayView]];
+    }
+    else if (superlayer != nil && [superlayer isKindOfClass:[RMMarker class]])
+    {
+        [self mapOverlayView:overlayView
+doubleTapOnLabelForAnnotation:[((RMMarker *)superlayer) annotation]
+                     atPoint:[recognizer locationInView:overlayView]];
+    }
+    else if ([superlayer superlayer] != nil && [[superlayer superlayer] isKindOfClass:[RMMarker class]])
+    {
+        [self mapOverlayView:overlayView 
+doubleTapOnLabelForAnnotation:[((RMMarker *)[superlayer superlayer]) annotation] 
+                     atPoint:[recognizer locationInView:overlayView]];
+    } 
+    else 
+    {
+        // if none of the conditions where satisfied we perform the corresponding
+        // action on the map
+        [self mapTiledLayerView:tiledLayerView 
+               doubleTapAtPoint:[recognizer locationInView:self]];
+    }
+}
+
+
+// two finger taps
+
+- (void)handleTwoFingerSingleTap:(UIGestureRecognizer *)recognizer
+{
+    [self mapTiledLayerView:tiledLayerView
+  twoFingerSingleTapAtPoint:[recognizer locationInView:self]];
+}
+
+- (void)handleTwoFingerDoubleTap:(UIGestureRecognizer *)recognizer
+{
+    [self mapTiledLayerView:tiledLayerView 
+  twoFingerDoubleTapAtPoint:[recognizer locationInView:self]];
+}
+
+
+// pan
+
+- (void)handlePanGesture:(UIPanGestureRecognizer *)recognizer
+{    
+    if (recognizer.state == UIGestureRecognizerStateBegan)
+    {
+        CALayer *hit = [overlayView.layer hitTest:[recognizer locationInView:overlayView]];
+        
+        // this method is only invoked if we hit a layer and the marker has
+        // enableDragging set to true
+        
+        overlayView.lastTranslation = CGPointZero;
+        [overlayView.draggedAnnotation release];
+        overlayView.draggedAnnotation = [[self findAnnotationInLayer:hit] retain];
+    }
+    
+    if (recognizer.state == UIGestureRecognizerStateChanged)
+    {
+        CGPoint translation = [recognizer translationInView:overlayView];
+        CGPoint delta = CGPointMake(overlayView.lastTranslation.x - translation.x, overlayView.lastTranslation.y - translation.y);
+        overlayView.lastTranslation = translation;
+        
+        [CATransaction begin];
+        [CATransaction setAnimationDuration:0];
+        [self mapOverlayView:overlayView didDragAnnotation:overlayView.draggedAnnotation withDelta:delta];
+        [CATransaction commit];
+    }
+    else if (recognizer.state == UIGestureRecognizerStateEnded)
+    {
+        [self mapOverlayView:overlayView didEndDragAnnotation:overlayView.draggedAnnotation];
+        [overlayView.draggedAnnotation release]; overlayView.draggedAnnotation = nil;
+    }
+}
+
+- (RMAnnotation *)findAnnotationInLayer:(CALayer *)layer
+{
+    if ([layer respondsToSelector:@selector(annotation)])
+        return [((RMMarker *)layer) annotation];
+    
+    CALayer *superlayer = [layer superlayer];
+    
+    if (superlayer != nil && [superlayer respondsToSelector:@selector(annotation)])
+        return [((RMMarker *)superlayer) annotation];
+    else if ([superlayer superlayer] != nil && [[superlayer superlayer] respondsToSelector:@selector(annotation)])
+        return [((RMMarker *)[superlayer superlayer]) annotation];
+    
+    return nil;
+}
+
+
+// long press
+
+- (void)handleLongPress:(UILongPressGestureRecognizer *)recognizer
+{
+    if (recognizer.state != UIGestureRecognizerStateBegan) return;
+    
+    [self mapTiledLayerView:tiledLayerView longPressAtPoint:[recognizer locationInView:self]];
+}
+
+
 #pragma mark -
 #pragma mark MapView (ScrollView)
 
@@ -970,8 +1156,54 @@
 
     overlayView = [[RMMapOverlayView alloc] initWithFrame:[self bounds]];
     overlayView.delegate = self;
-
+    // the overlay view does not handle any gestures
+    // all gestures are handled by either the mapview or the scrollview
+    overlayView.userInteractionEnabled = NO;
+    
     [self insertSubview:overlayView aboveSubview:mapScrollView];
+    
+    
+    // add gesture recognizers
+    
+    // one finger taps
+    UITapGestureRecognizer *doubleTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTap:)] autorelease];
+    doubleTapRecognizer.numberOfTouchesRequired = 1;
+    doubleTapRecognizer.numberOfTapsRequired = 2;
+    
+    UITapGestureRecognizer *singleTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)] autorelease];
+    singleTapRecognizer.numberOfTouchesRequired = 1;
+    [singleTapRecognizer requireGestureRecognizerToFail:doubleTapRecognizer];
+    
+    [self addGestureRecognizer:singleTapRecognizer];
+    [self addGestureRecognizer:doubleTapRecognizer];
+    
+    // two finger taps
+    UITapGestureRecognizer *twoFingerDoubleTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTwoFingerDoubleTap:)] autorelease];
+    twoFingerDoubleTapRecognizer.numberOfTapsRequired = 2;
+    twoFingerDoubleTapRecognizer.numberOfTouchesRequired = 2;
+    
+    UITapGestureRecognizer *twoFingerSingleTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTwoFingerSingleTap:)] autorelease];
+    twoFingerSingleTapRecognizer.numberOfTouchesRequired = 2;
+    [twoFingerSingleTapRecognizer requireGestureRecognizerToFail:twoFingerDoubleTapRecognizer];
+    
+    [self addGestureRecognizer:twoFingerSingleTapRecognizer];
+    [self addGestureRecognizer:twoFingerDoubleTapRecognizer];    
+    
+    // long press
+    UILongPressGestureRecognizer *longPressRecognizer = [[[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)] autorelease];
+    
+    [self addGestureRecognizer:longPressRecognizer];
+    
+    // pan
+    UIPanGestureRecognizer *panGestureRecognizer = [[[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)] autorelease];
+    panGestureRecognizer.minimumNumberOfTouches = 1;
+    panGestureRecognizer.maximumNumberOfTouches = 1;
+    // the delegate is used to decide whether a pan should be handled by this
+    // recognizer or by the pan gesture recognizer of the scrollview
+    panGestureRecognizer.delegate = self;
+    // the pan recognizer is added to the scrollview as it competes with the
+    // pan recognizer of the scrollview
+    [mapScrollView addGestureRecognizer:panGestureRecognizer];
 }
 
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView
