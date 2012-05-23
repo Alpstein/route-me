@@ -31,6 +31,11 @@
 
 @property (nonatomic, assign) id <RMMapOverlayViewDelegate> delegate;
 
+
+@property (nonatomic, assign) CGPoint lastTranslation;
+@property (nonatomic, assign) RMAnnotation *draggedAnnotation;
+
+
 - (unsigned)sublayersCount;
 
 - (void)addSublayer:(CALayer *)aLayer;

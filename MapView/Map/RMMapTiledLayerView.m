@@ -50,28 +50,6 @@
     tiledLayer.levelsOfDetail = [[mapView tileSource] maxZoom];
     tiledLayer.levelsOfDetailBias = [[mapView tileSource] maxZoom];
 
-    UITapGestureRecognizer *doubleTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTap:)] autorelease];
-    doubleTapRecognizer.numberOfTapsRequired = 2;
-
-    UITapGestureRecognizer *singleTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)] autorelease];
-    [singleTapRecognizer requireGestureRecognizerToFail:doubleTapRecognizer];
-
-    UITapGestureRecognizer *twoFingerDoubleTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTwoFingerDoubleTap:)] autorelease];
-    twoFingerDoubleTapRecognizer.numberOfTapsRequired = 2;
-    twoFingerDoubleTapRecognizer.numberOfTouchesRequired = 2;
-
-    UITapGestureRecognizer *twoFingerSingleTapRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTwoFingerSingleTap:)] autorelease];
-    twoFingerSingleTapRecognizer.numberOfTouchesRequired = 2;
-    [twoFingerSingleTapRecognizer requireGestureRecognizerToFail:twoFingerDoubleTapRecognizer];
-
-    UILongPressGestureRecognizer *longPressRecognizer = [[[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)] autorelease];
-
-    [self addGestureRecognizer:singleTapRecognizer];
-    [self addGestureRecognizer:doubleTapRecognizer];
-    [self addGestureRecognizer:twoFingerDoubleTapRecognizer];
-    [self addGestureRecognizer:twoFingerSingleTapRecognizer];
-    [self addGestureRecognizer:longPressRecognizer];
-
     return self;
 }
 
@@ -140,39 +118,5 @@
     [pool release]; pool = nil;
 }
 
-#pragma mark -
-#pragma mark Event handling
-
-- (void)handleSingleTap:(UIGestureRecognizer *)recognizer
-{
-    if ([delegate respondsToSelector:@selector(mapTiledLayerView:singleTapAtPoint:)])
-        [delegate mapTiledLayerView:self singleTapAtPoint:[recognizer locationInView:mapView]];
-}
-
-- (void)handleTwoFingerSingleTap:(UIGestureRecognizer *)recognizer
-{
-    if ([delegate respondsToSelector:@selector(mapTiledLayerView:twoFingerSingleTapAtPoint:)])
-        [delegate mapTiledLayerView:self twoFingerSingleTapAtPoint:[recognizer locationInView:mapView]];
-}
-
-- (void)handleLongPress:(UILongPressGestureRecognizer *)recognizer
-{
-    if (recognizer.state != UIGestureRecognizerStateBegan) return;
-
-    if ([delegate respondsToSelector:@selector(mapTiledLayerView:longPressAtPoint:)])
-        [delegate mapTiledLayerView:self longPressAtPoint:[recognizer locationInView:mapView]];
-}
-
-- (void)handleDoubleTap:(UIGestureRecognizer *)recognizer
-{
-    if ([delegate respondsToSelector:@selector(mapTiledLayerView:doubleTapAtPoint:)])
-        [delegate mapTiledLayerView:self doubleTapAtPoint:[recognizer locationInView:mapView]];
-}
-
-- (void)handleTwoFingerDoubleTap:(UIGestureRecognizer *)recognizer
-{
-    if ([delegate respondsToSelector:@selector(mapTiledLayerView:twoFingerDoubleTapAtPoint:)])
-        [delegate mapTiledLayerView:self twoFingerDoubleTapAtPoint:[recognizer locationInView:mapView]];
-}
 
 @end
