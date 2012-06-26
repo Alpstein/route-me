@@ -109,7 +109,16 @@
         return;
 
     float scale = 1.0f / [mapView metersPerPixel];
-
+    
+    if (animated || scale != lastScale)
+    {
+        self.shouldRasterize = NO;
+    }
+    else
+    {
+        self.shouldRasterize = YES;
+    }
+    
     // we have to calculate the scaledLineWidth even if scalling did not change
     // as the lineWidth might have changed
     float scaledLineWidth;
