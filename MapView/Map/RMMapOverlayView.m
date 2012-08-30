@@ -10,6 +10,7 @@
 #import "RMMarker.h"
 #import "RMAnnotation.h"
 #import "RMPixel.h"
+#import "RMMapView.h"
 
 @implementation RMMapOverlayView
 
@@ -56,6 +57,66 @@
 - (void)moveLayersBy:(CGPoint)delta
 {
     [self.layer scrollPoint:CGPointMake(-delta.x, -delta.y)];
+}
+
+- (CALayer *)overlayHitTest:(CGPoint)point
+{
+    RMMapView *mapView = ((RMMapView *)self.superview);
+
+    // here we hide the accuracy circle & tracking halo to exclude from hit
+    // testing, as well as be sure to show the user location (even if in
+    // heading mode) to ensure hits on it
+    //
+    RMAnnotation *userLocationAnnotation = (RMAnnotation *)mapView.userLocation;
+    RMAnnotation *accuracyCircleAnnotation = nil;
+    RMAnnotation *trackingHaloAnnotation   = nil;
+
+    NSArray *matches = nil;
+
+    matches = [mapView.annotations filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"annotationType = %@", kRMAccuracyCircleAnnotationTypeName]];
+
+    if ([matches count])
+        accuracyCircleAnnotation = [matches lastObject];
+
+    matches = [mapView.annotations filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"annotationType = %@", kRMTrackingHaloAnnotationTypeName]];
+
+    if ([matches count])
+        trackingHaloAnnotation = [matches lastObject];
+
+    BOOL userLocationFlag;
+    BOOL accuracyCircleFlag;
+    BOOL trackingHaloFlag;
+
+    if (userLocationAnnotation)
+    {
+        userLocationFlag = userLocationAnnotation.layer.isHidden;
+        userLocationAnnotation.layer.hidden = NO;
+    }
+
+    if (accuracyCircleAnnotation)
+    {
+        accuracyCircleFlag = accuracyCircleAnnotation.layer.isHidden;
+        accuracyCircleAnnotation.layer.hidden = YES;
+    }
+
+    if (trackingHaloAnnotation)
+    {
+        trackingHaloFlag = trackingHaloAnnotation.layer.isHidden;
+        trackingHaloAnnotation.layer.hidden = YES;
+    }
+
+    CALayer *hit = [self.layer hitTest:point];
+
+    if (userLocationAnnotation)
+        userLocationAnnotation.layer.hidden = userLocationFlag;
+
+    if (accuracyCircleAnnotation)
+        accuracyCircleAnnotation.layer.hidden = accuracyCircleFlag;
+
+    if (trackingHaloAnnotation)
+        trackingHaloAnnotation.layer.hidden = trackingHaloFlag;
+
+    return hit;
 }
 
 @end

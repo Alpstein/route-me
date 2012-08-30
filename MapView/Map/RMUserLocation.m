@@ -21,13 +21,13 @@
     if ( ! (self = [super initWithMapView:aMapView coordinate:aCoordinate andTitle:aTitle]))
         return nil;
 
-    NSAssert([[NSBundle mainBundle] pathForResource:@"TrackingDot" ofType:@"png"], @"Unable to find necessary user location graphical assets (copy from MapView/Map/Resources)");
-    
-    layer = [[RMMarker alloc] initWithUIImage:[UIImage imageNamed:@"TrackingDot.png"]];
+    self.layer = [[[RMMarker alloc] initWithUIImage:[UIImage imageNamed:@"TrackingDot.png"]] autorelease];
 
-    annotationType = [kRMUserLocationAnnotationTypeName retain];
+    self.layer.zPosition = -MAXFLOAT + 2;
 
-    clusteringEnabled = NO;
+    self.annotationType = kRMUserLocationAnnotationTypeName;
+
+    self.clusteringEnabled = NO;
 
     return self;
 }

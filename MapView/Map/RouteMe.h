@@ -42,6 +42,7 @@
 #import "RMFractalTileProjection.h"
 #import "RMGenericMapSource.h"
 #import "RMGlobalConstants.h"
+#import "RMLoadingTileView.h"
 #import "RMMapLayer.h"
 #import "RMMapOverlayView.h"
 #import "RMMapQuestOSMSource.h"
