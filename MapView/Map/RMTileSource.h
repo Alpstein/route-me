@@ -52,10 +52,10 @@
 @property (nonatomic, assign) float maxZoom;
 
 /** A Boolean value indicating whether the tiles from this source should be cached. */
-@property (nonatomic, assign, getter = isCacheable) BOOL cacheable;
+@property (nonatomic, assign, getter=isCacheable) BOOL cacheable;
 
-/** A Boolean value indicating whether the tiles from this source are opaque. Setting this to correctly is important when using RMCompositeSource. */
-@property (nonatomic, assign, getter = isOpaque) BOOL opaque;
+/** A Boolean value indicating whether the tiles from this source are opaque. Setting this correctly is important when using RMCompositeSource so that alpha transparency can be preserved when compositing tile images. */
+@property (nonatomic, assign, getter=isOpaque) BOOL opaque;
 
 @property (nonatomic, readonly) RMFractalTileProjection *mercatorToTileProjection;
 @property (nonatomic, readonly) RMProjection *projection;
@@ -99,9 +99,9 @@
 *   @return An image to display. */
 - (UIImage *)imageForTile:(RMTile)tile inCache:(RMTileCache *)tileCache;
 
-/** Check if the tile source contains the requested tile at all.
- *   @param tile The map tile in question.
- *   @return A Boolean value indicating whether the tile source contains the requested tile. */
+/** Check if the tile source can provide the requested tile.
+ *  @param tile The map tile in question.
+ *  @return A Boolean value indicating whether the tile source can provide the requested tile. */
 - (BOOL)tileSourceHasTile:(RMTile)tile;
 
 - (void)cancelAllDownloads;
