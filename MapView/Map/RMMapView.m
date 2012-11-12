@@ -335,6 +335,8 @@
 {
     LogMethod();
 
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+
     [self setDelegate:nil];
     [self setBackgroundView:nil];
     [self setQuadTree:nil];
@@ -2499,6 +2501,9 @@
         _locationManager.headingFilter = 5;
         _locationManager.delegate = self;
         [_locationManager startUpdatingLocation];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidEnterBackground:)  name:UIApplicationDidEnterBackgroundNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
     }
     else
     {
@@ -2507,6 +2512,9 @@
         _locationManager.delegate = nil;
         [_locationManager release];
         _locationManager = nil;
+
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidEnterBackgroundNotification object:nil];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillEnterForegroundNotification object:nil];
 
         if (_delegateHasDidStopLocatingUser)
             [_delegate mapViewDidStopLocatingUser:self];
@@ -2865,6 +2873,26 @@
         if (_delegateHasDidFailToLocateUserWithError)
             [_delegate mapView:self didFailToLocateUserWithError:error];
     }
+}
+
+#pragma mark -
+#pragma mark system events
+
+- (void)applicationDidEnterBackground:(UIApplication *)application {
+  if (_locationManager != nil) {
+    [_locationManager stopUpdatingLocation];
+    [_locationManager stopUpdatingHeading];
+  }
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application {
+  if (_locationManager != nil) {
+    if (_showsUserLocation == YES)
+      [_locationManager startUpdatingLocation];
+    
+    if (_userTrackingMode == RMUserTrackingModeFollowWithHeading)
+      [_locationManager startUpdatingHeading];
+  }
 }
 
 @end
