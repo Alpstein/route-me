@@ -38,10 +38,6 @@
 #import "RMMapScrollView.h"
 #import "RMTileSourcesContainer.h"
 
-#define kRMUserLocationAnnotationTypeName   @"RMUserLocationAnnotation"
-#define kRMTrackingHaloAnnotationTypeName   @"RMTrackingHaloAnnotation"
-#define kRMAccuracyCircleAnnotationTypeName @"RMAccuracyCircleAnnotation"
-
 @class RMProjection;
 @class RMFractalTileProjection;
 @class RMTileCache;
@@ -121,7 +117,7 @@ typedef enum : NSUInteger {
 
 /** @name Fine-Tuning the Map Appearance */
 
-/** Take missing tiles from lower-numbered zoom levels, up to a given number of zoom levels, in order to increase perceived tile load performance. Defaults to 0. */
+/** Take missing tiles from lower-numbered zoom levels, up to a given number of zoom levels. This can be used in order to increase perceived tile load performance or to allow zooming in beyond levels supported natively by a given tile source. Defaults to 0. */
 @property (nonatomic, assign) NSUInteger missingTilesDepth;
 
 @property (nonatomic, assign) NSUInteger boundingMask;
@@ -148,9 +144,9 @@ typedef enum : NSUInteger {
 *   @param frame The map view's frame. 
 *   @param newTilesource A tile source to use for the map tiles. 
 *   @param initialCenterCoordinate The starting map center coordinate.
-*   @param initialZoomLevel The starting map zoom level, clamped to the zoom levels supported by the tile source(s).
-*   @param maxZoomLevel The maximum zoom level allowed by the map view, clamped to the zoom levels supported by the tile source(s).
-*   @param minZoomLevel The minimum zoom level allowed by the map view, clamped to the zoom levels supported by the tile source(s).
+*   @param initialTileSourceZoomLevel The starting map zoom level, clamped to the zoom levels supported by the tile source(s).
+*   @param initialTileSourceMaxZoomLevel The maximum zoom level allowed by the map view, clamped to the zoom levels supported by the tile source(s).
+*   @param initialTileSourceMinZoomLevel The minimum zoom level allowed by the map view, clamped to the zoom levels supported by the tile source(s).
 *   @param backgroundImage A custom background image to use behind the map instead of the default gridded tile background that moves with the map. 
 *   @return An initialized map view, or `nil` if a map view was unable to be initialized. */
 - (id)initWithFrame:(CGRect)frame
@@ -162,6 +158,8 @@ typedef enum : NSUInteger {
     backgroundImage:(UIImage *)backgroundImage;
 
 - (void)setFrame:(CGRect)frame;
+
++ (UIImage *)resourceImageNamed:(NSString *)imageName;
 
 #pragma mark - Movement
 
@@ -212,6 +210,17 @@ typedef enum : NSUInteger {
 
 // recenter the map on #boundsRect, expressed in projected meters
 - (void)setProjectedBounds:(RMProjectedRect)boundsRect animated:(BOOL)animated;
+
+/** Set zoom level, optionally with an animation. 
+*   @param newZoom The desired zoom level.
+*   @param animated Whether to animate the map change. */
+- (void)setZoom:(float)newZoom animated:(BOOL)animated;
+
+/** Set both zoom level and center coordinate at the same time, optionally with an animation. 
+*   @param newZoom The desired zoom level. 
+*   @param newCenter The desired center coordinate. 
+*   @param animated Whether to animate the map change. */
+- (void)setZoom:(float)newZoom atCoordinate:(CLLocationCoordinate2D)newCenter animated:(BOOL)animated;
 
 /** Zoom the map by a given factor near a certain point. 
 *   @param zoomFactor The factor by which to zoom the map. 
@@ -311,6 +320,21 @@ typedef enum : NSUInteger {
 *   @return The screen position of the annotation. */
 - (CGPoint)mapPositionForAnnotation:(RMAnnotation *)annotation;
 
+/** Selects the specified annotation and displays a callout view for it.
+*
+*   If the specified annotation is not onscreen, and therefore does not have an associated annotation layer, this method has no effect.
+*   @param annotation The annotation object to select.
+*   @param animated If `YES`, the callout view is animated into position. */
+- (void)selectAnnotation:(RMAnnotation *)annotation animated:(BOOL)animated;
+
+/** Deselects the specified annotation and hides its callout view.
+*   @param annotation The annotation object to deselect.
+*   @param animated If `YES`, the callout view is animated offscreen. */
+- (void)deselectAnnotation:(RMAnnotation *)annotation animated:(BOOL)animated;
+
+/** The annotation that is currently selected. */
+@property (nonatomic, retain) RMAnnotation *selectedAnnotation;
+
 #pragma mark - TileSources
 
 @property (nonatomic, retain) RMQuadTree *quadTree;
@@ -323,7 +347,7 @@ typedef enum : NSUInteger {
 /** Whether to position cluster markers at the weighted center of the points they represent. If `YES`, position clusters in weighted fashion. If `NO`, position them on a rectangular grid. Defaults to `NO`. */
 @property (nonatomic, assign) BOOL positionClusterMarkersAtTheGravityCenter;
 
-/** Order markers on the z axis in increasing y-position. */
+/** Whether to order markers on the z-axis according to increasing y-position. Defaults to `YES`. */
 @property (nonatomic, assign) BOOL orderMarkersByYPosition;
 
 /** Whether to order cluster markers above non-clustered markers. Defaults to `NO`. */

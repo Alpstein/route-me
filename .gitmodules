@@ -1,3 +1,6 @@
 [submodule "MapView/Map/FMDB"]
 	path = MapView/Map/FMDB
 	url = https://github.com/ccgus/fmdb.git
+[submodule "MapView/Map/SMCalloutView"]
+	path = MapView/Map/SMCalloutView
+	url = https://github.com/nfarina/calloutview.git

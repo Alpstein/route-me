@@ -54,7 +54,7 @@
     if (!(self = [super init]))
         return nil;
 
-    shapeLayer = [[CAShapeLayer alloc] init];
+    shapeLayer = [CAShapeLayer new];
     [self addSublayer:shapeLayer];
 
     mapView = aMapView;
@@ -69,6 +69,8 @@
 
     circlePath = NULL;
     [self updateCirclePathAnimated:NO];
+
+    self.masksToBounds = NO;
 
     return self;
 }
@@ -131,6 +133,11 @@
 }
 
 #pragma mark - Accessors
+
+- (BOOL)containsPoint:(CGPoint)thePoint
+{
+    return CGPathContainsPoint(shapeLayer.path, nil, thePoint, [shapeLayer.fillRule isEqualToString:kCAFillRuleEvenOdd]);
+}
 
 - (void)setLineColor:(UIColor *)newLineColor
 {

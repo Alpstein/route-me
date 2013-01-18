@@ -60,10 +60,13 @@
 /** The annotation's title. */
 @property (nonatomic, retain) NSString *title;
 
+/** The annotation's subtitle. */
+@property (nonatomic, retain) NSString *subtitle;
+
 /** Storage for arbitrary data. */
 @property (nonatomic, retain) id userInfo;
 
-/** An arbitrary string representing the type of annotation. Useful for determining which layer to draw for the annotation when requested. */
+/** An arbitrary string representing the type of annotation. Useful for determining which layer to draw for the annotation when requested in the delegate. Cluster annotations, which are automatically created by a map view, will automatically have an annotationType of `RMClusterAnnotation`. */
 @property (nonatomic, retain) NSString *annotationType;
 
 /** An arbitrary icon image for the annotation. Useful to pass an image at annotation creation time for use in the layer at a later time. */
