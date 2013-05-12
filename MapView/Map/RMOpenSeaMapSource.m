@@ -40,6 +40,11 @@
 	return self;
 }
 
+- (NSURL *)URLForTile:(RMTile)tile
+{
+    return [[self URLsForTile:tile] lastObject];
+}
+
 - (NSArray *)URLsForTile:(RMTile)tile
 {
 	NSAssert4(((tile.zoom >= self.minZoom) && (tile.zoom <= self.maxZoom)),
