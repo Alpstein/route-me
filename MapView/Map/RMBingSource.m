@@ -27,6 +27,8 @@
 
 #import "RMBingSource.h"
 
+#import "RMConfiguration.h"
+
 @implementation RMBingSource
 {
     NSString *_mapsKey;
@@ -43,7 +45,7 @@
 {
     if (self = [super init])
     {
-        _mapsKey = [mapsKey retain];
+        _mapsKey = mapsKey;
 
         _imagerySet = imagerySet;
 
@@ -54,13 +56,6 @@
     }
 
     return nil;
-}
-
-- (void)dealloc
-{
-    [_mapsKey release]; _mapsKey = nil;
-    [_imageURLString release]; _imageURLString = nil;
-    [super dealloc];
 }
 
 - (NSURL *)URLForTile:(RMTile)tile
@@ -78,7 +73,7 @@
 
         NSURL *metadataURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://dev.virtualearth.net/REST/v1/Imagery/Metadata/%@?key=%@", imagerySetString, _mapsKey]];
 
-        NSData *metadataData = [NSData dataWithContentsOfURL:metadataURL];
+        NSData *metadataData = [NSData brandedDataWithContentsOfURL:metadataURL];
 
         id metadata = [NSJSONSerialization JSONObjectWithData:metadataData options:0 error:nil];
 

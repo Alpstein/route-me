@@ -49,13 +49,16 @@
 /** @name Accessing Drawing Properties */
 
 /** The circle's underlying shape layer. */
-@property (nonatomic, retain) CAShapeLayer *shapeLayer;
+@property (nonatomic, strong) CAShapeLayer *shapeLayer;
 
 /** The circle's line color. Defaults to black. */
-@property (nonatomic, retain) UIColor *lineColor;
+@property (nonatomic, strong) UIColor *lineColor;
 
 /** The circle's fill color. Defaults to blue. */
-@property (nonatomic, retain) UIColor *fillColor;
+@property (nonatomic, strong) UIColor *fillColor;
+
+/** The fill pattern image of the circle. If set, the `fillColor` is set to `nil`. */
+@property (nonatomic, strong) UIImage *fillPatternImage;
 
 /** The radius of the circle in projected meters. Regardless of map zoom, the circle will change visible size to continously represent this radius on the map. */
 @property (nonatomic, assign) CGFloat radiusInMeters;

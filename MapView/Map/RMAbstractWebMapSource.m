@@ -26,7 +26,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #import "RMAbstractWebMapSource.h"
+
 #import "RMTileCache.h"
+#import "RMConfiguration.h"
 
 #define HTTP_404_NOT_FOUND 404
 
@@ -50,13 +52,6 @@
     activeDownloadsCondition = [NSCondition new];
 
     return self;
-}
-
-- (void)dealloc
-{
-    [activeDownloadsTileHashes release]; activeDownloadsTileHashes = nil;
-    [activeDownloadsCondition release]; activeDownloadsCondition = nil;
-    [super dealloc];
 }
 
 - (NSURL *)URLForTile:(RMTile)tile
@@ -95,8 +90,6 @@
         [[NSNotificationCenter defaultCenter] postNotificationName:RMTileRequested object:[NSNumber numberWithUnsignedLongLong:RMTileKey(tile)]];
     });
 
-    [tileCache retain];
-
     // Prevent double downloads
     NSNumber *tileHash = [NSNumber numberWithUnsignedLongLong:RMTileKey(tile)];
 
@@ -112,7 +105,6 @@
         if (image)
         {
             [activeDownloadsCondition unlock];
-            [tileCache release];
 
             return image;
         }
@@ -147,7 +139,7 @@
                 {
                     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:currentURL];
                     [request setTimeoutInterval:(self.requestTimeoutSeconds / (CGFloat)self.retryCount)];
-                    tileData = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
+                    tileData = [NSURLConnection sendBrandedSynchronousRequest:request returningResponse:nil error:nil];
                 }
 
                 if (tileData)
@@ -196,7 +188,7 @@
             NSHTTPURLResponse *response = nil;
             NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[URLs objectAtIndex:0]];
             [request setTimeoutInterval:(self.requestTimeoutSeconds / (CGFloat)self.retryCount)];
-            image = [UIImage imageWithData:[NSURLConnection sendSynchronousRequest:request returningResponse:&response error:nil]];
+            image = [UIImage imageWithData:[NSURLConnection sendBrandedSynchronousRequest:request returningResponse:&response error:nil]];
 
             if (response.statusCode == HTTP_404_NOT_FOUND)
                 break;
@@ -210,8 +202,6 @@
     [activeDownloadsTileHashes removeObject:tileHash];
     [activeDownloadsCondition signal];
     [activeDownloadsCondition unlock];
-
-    [tileCache release];
 
     dispatch_async(dispatch_get_main_queue(), ^(void)
     {

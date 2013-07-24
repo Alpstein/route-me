@@ -47,19 +47,13 @@
         [self addSubview:_contentView];
 
         [self setMapZooming:NO];
-        
+
         self.userInteractionEnabled = NO;
         self.showsHorizontalScrollIndicator = NO;
         self.showsVerticalScrollIndicator = NO;
     }
     
     return self;
-}
-
-- (void)dealloc
-{
-    [_contentView release]; _contentView = nil;
-    [super dealloc];
 }
 
 - (void)setMapZooming:(BOOL)zooming

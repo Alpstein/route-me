@@ -67,15 +67,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [_tileSources release]; _tileSources = nil;
-    [_tileSourcesLock release]; _tileSourcesLock = nil;
-    [_projection release]; _projection = nil;
-    [_mercatorToTileProjection release]; _mercatorToTileProjection = nil;
-    [super dealloc];
-}
-
 #pragma mark -
 
 - (void)setBoundingBoxFromTilesources
@@ -115,7 +106,7 @@
     tileSources = [_tileSources copy];
     [_tileSourcesLock unlock];
 
-    return [tileSources autorelease];
+    return tileSources;
 }
 
 - (id <RMTileSource>)tileSourceForUniqueTilecacheKey:(NSString *)uniqueTilecacheKey
@@ -140,14 +131,14 @@
         }
         else if ([[currentTileSource uniqueTilecacheKey] isEqualToString:uniqueTilecacheKey])
         {
-            result = [currentTileSource retain];
+            result = currentTileSource;
             break;
         }
     }
 
     [_tileSourcesLock unlock];
 
-    return [result autorelease];
+    return result;
 }
 
 - (BOOL)setTileSource:(id <RMTileSource>)tileSource
@@ -197,7 +188,7 @@
 
     if ( ! _projection)
     {
-        _projection = [newProjection retain];
+        _projection = newProjection;
     }
     else if (_projection != newProjection)
     {
@@ -207,7 +198,7 @@
     }
 
     if ( ! _mercatorToTileProjection)
-        _mercatorToTileProjection = [newFractalTileProjection retain];
+        _mercatorToTileProjection = newFractalTileProjection;
 
     // minZoom and maxZoom are the min and max values of all tile sources, so that individual tilesources
     // could have a smaller zoom level range
@@ -324,15 +315,13 @@
         return;
     }
 
-    id tileSource = [[_tileSources objectAtIndex:fromIndex] retain];
+    id tileSource = [_tileSources objectAtIndex:fromIndex];
     [_tileSources removeObjectAtIndex:fromIndex];
 
     if (toIndex >= [_tileSources count])
         [_tileSources addObject:tileSource];
     else
         [_tileSources insertObject:tileSource atIndex:toIndex];
-
-    [tileSource autorelease];
 
     [_tileSourcesLock unlock];
 }
@@ -344,8 +333,8 @@
     [self cancelAllDownloads];
     [_tileSources removeAllObjects];
 
-    [_projection release]; _projection = nil;
-    [_mercatorToTileProjection release]; _mercatorToTileProjection = nil;
+     _projection = nil;
+     _mercatorToTileProjection = nil;
 
     _latitudeLongitudeBoundingBox = ((RMSphericalTrapezium) {
         .northEast = {.latitude = 90.0, .longitude = 180.0},

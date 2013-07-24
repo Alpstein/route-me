@@ -14,7 +14,7 @@ MapBox users might be interested in the [MapBox fork][6], which includes lots of
    [3]: http://www.openseamap.org/
    [4]: http://developer.mapquest.com/web/products/open/map
    [5]: http://developer.mapquest.com/web/products/open/map
-   [6]: http://mapbox.com/mobile
+   [6]: http://mapbox.com/mapbox-ios-sdk
 
 
 Installation
@@ -76,7 +76,7 @@ Major changes in this fork (Alpstein/route-me)
 
 * Snapshots from the map
 
-* Requires at least iOS 4.0 and Xcode 4.3
+* Requires iOS 5 or greater, Xcode 4.3 or greater, and Automatic Reference Counting (ARC). 
 
 
 Dependent Libraries
@@ -84,5 +84,5 @@ Dependent Libraries
 
 Route-Me makes use of several sub-libraries, listed below. See License.txt for more detailed information about Route-Me and Proj4 and see the individual license files in the sub-libraries for more information on each. 
 
- * [FMDB](https://github.com/ccgus/fmdb) by Gus Mueller (SQLite for caching and MBTiles)
+ * [FMDB](https://github.com/ccgus/fmdb) by Gus Mueller (SQLite for caching)
  * [SMCalloutView](https://github.com/nfarina/calloutview) by Nick Farina (annotation callouts)

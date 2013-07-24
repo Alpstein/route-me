@@ -114,7 +114,7 @@
 
 	RMLog(@"Opening database at %@", path);
 
-    _queue = [[FMDatabaseQueue databaseQueueWithPath:path] retain];
+    _queue = [FMDatabaseQueue databaseQueueWithPath:path];
 
 	if (!_queue)
 	{
@@ -122,7 +122,6 @@
 
         [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
 
-        [self release];
         return nil;
 	}
 
@@ -141,17 +140,6 @@
 - (id)initUsingCacheDir:(BOOL)useCacheDir
 {
 	return [self initWithDatabase:[RMDatabaseCache dbPathUsingCacheDir:useCacheDir]];
-}
-
-- (void)dealloc
-{
-    self.databasePath = nil;
-    [_writeQueueLock lock];
-    [_writeQueue release]; _writeQueue = nil;
-    [_writeQueueLock unlock];
-    [_writeQueueLock release]; _writeQueueLock = nil;
-    [_queue release]; _queue = nil;
-	[super dealloc];
 }
 
 - (void)setPurgeStrategy:(RMCachePurgeStrategy)theStrategy
@@ -179,6 +167,11 @@
     _expiryPeriod = theExpiryPeriod;
     
     srand(time(NULL));
+}
+
+- (unsigned long long)fileSize
+{
+    return [[[NSFileManager defaultManager] attributesOfItemAtPath:self.databasePath error:nil] fileSize];
 }
 
 - (UIImage *)cachedImage:(RMTile)tile withCacheKey:(NSString *)aCacheKey
