@@ -123,6 +123,7 @@
 
     // Load the tiles
     NSArray *URLs = [self URLsForTile:tile];
+    NSUInteger numTileImagesLoaded = 0;
 
     if ([URLs count] > 1)
     {
@@ -186,6 +187,7 @@
                 {
                     image = [UIImage imageWithData:tileData];
                 }
+                numTileImagesLoaded = numTileImagesLoaded + 1;
             }
         }
     }
@@ -201,9 +203,10 @@
             if (response.statusCode == HTTP_404_NOT_FOUND)
                 break;
         }
+        numTileImagesLoaded = 1;
     }
 
-    if (image && self.isCacheable)
+    if (image && self.isCacheable && numTileImagesLoaded == [URLs count])
         [tileCache addImage:image forTile:tile withCacheKey:[self uniqueTilecacheKey]];
 
     [activeDownloadsCondition lock];
