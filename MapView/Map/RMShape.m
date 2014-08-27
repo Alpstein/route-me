@@ -577,4 +577,14 @@
     [self recalculateGeometryAnimated:NO];
 }
 
+- (void)setIgnorePathUpdates:(BOOL)value
+{
+    ignorePathUpdates = value;
+}
+
+- (NSArray*)points
+{
+    return points;
+}
+
 @end

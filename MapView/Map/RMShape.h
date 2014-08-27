@@ -138,4 +138,11 @@
 * There is no requirement that a path be closed. */
 - (void)closePath;
 
+/** Setter to ignore path updates
+ *   @param value The value whether path updates should be ignored or not. */
+- (void)setIgnorePathUpdates:(BOOL)value;
+/**
+ * @return array of cllocation points */
+- (NSArray*)points;
+
 @end
