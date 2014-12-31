@@ -122,6 +122,12 @@ typedef NS_ENUM(NSUInteger, RMMapDecelerationMode) {
 
 @property (nonatomic, assign) NSUInteger boundingMask;
 
+/** The scroll view containing the map tiles */
+@property (nonatomic, assign, readonly) RMMapScrollView *mapScrollView;
+
+/** The view used for map overlays like annotations */
+@property (nonatomic, assign, readonly) RMMapOverlayView *overlayView;
+
 /** A custom, static view to use behind the map tiles. The default behavior is to use grid imagery that moves with map panning like MapKit. */
 @property (nonatomic, retain) UIView *backgroundView;
 

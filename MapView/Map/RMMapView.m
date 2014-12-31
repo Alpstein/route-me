@@ -2153,6 +2153,16 @@
 
 #pragma mark - Properties
 
+- (RMMapScrollView *)mapScrollView
+{
+    return [[_mapScrollView retain] autorelease];
+}
+
+- (RMMapOverlayView *)overlayView
+{
+    return [[_overlayView retain] autorelease];
+}
+
 - (UIView *)backgroundView
 {
     return [[_backgroundView retain] autorelease];
